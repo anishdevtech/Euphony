@@ -1,14 +1,12 @@
-// App.tsx
-import { StatusBar } from 'expo-status-bar';
+// app/(tabs)/library.tsx
 import React from 'react';
 import { SafeAreaView, Text, View } from 'react-native';
 
-export default function App() {
+export default function Library() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
-      <StatusBar style="light" />
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ color: '#fff', fontSize: 20 }}>Euphony (Expo Skeleton)</Text>
+        <Text style={{ color: '#fff', fontSize: 20 }}>Library</Text>
       </View>
     </SafeAreaView>
   );
