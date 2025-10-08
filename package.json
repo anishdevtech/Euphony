@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "prebuild": "npm install --package-lock-only"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
@@ -21,7 +22,6 @@
     "expo-status-bar": "~3.0.8",
     "expo-web-browser": "^15.0.8",
     "react": "19.1.0",
-    "react-dom": "^19.2.0",
     "react-native": "0.81.4",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
@@ -29,11 +29,10 @@
     "react-native-video": "^6.17.0",
     "react-native-webview": "13.15.0",
     "react-native-ytdl": "^4.8.3",
-    "scheduler": "^0.27.0",
     "text-encoding-polyfill": "^0.6.7",
     "web-streams-polyfill": "^4.2.0",
-    "youtube-extractor": "github:anishdevtech/youtube-extractor-rn",
-    "youtubei.js": "^15.1.1"
+    "youtubei.js": "^15.1.1",
+    "youtube-extractor": "github:anishdevtech/youtube-extractor-rn"
   },
   "devDependencies": {
     "@babel/plugin-syntax-import-attributes": "^7.27.1",
