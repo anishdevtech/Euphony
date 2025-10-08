@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
 
 jobs:
   build:
@@ -41,6 +41,8 @@ jobs:
 
       - name: 🔨 Build Android APK
         run: eas build --platform android --profile preview --local --output ${{ github.workspace }}/Euphony.apk --non-interactive
+        env:
+          NPM_CONFIG_LEGACY_PEER_DEPS: true
 
       - name: 📤 Upload APK
         uses: actions/upload-artifact@v4
