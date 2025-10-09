@@ -16,6 +16,7 @@
     "expo": "~54.0.12",
     "expo-audio": "~1.0.13",
     "expo-av": "^16.0.7",
+    "expo-build-properties": "^1.0.9",
     "expo-constants": "~18.0.9",
     "expo-linking": "~8.0.8",
     "expo-router": "~6.0.10",
@@ -31,8 +32,8 @@
     "react-native-ytdl": "^4.8.3",
     "text-encoding-polyfill": "^0.6.7",
     "web-streams-polyfill": "^4.2.0",
-    "youtubei.js": "^15.1.1",
-    "youtube-extractor": "github:anishdevtech/youtube-extractor-rn"
+    "youtube-extractor": "github:anishdevtech/youtube-extractor-rn",
+    "youtubei.js": "^15.1.1"
   },
   "devDependencies": {
     "@babel/plugin-syntax-import-attributes": "^7.27.1",
