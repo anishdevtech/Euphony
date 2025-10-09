@@ -32,7 +32,6 @@
     "react-native-ytdl": "^4.8.3",
     "text-encoding-polyfill": "^0.6.7",
     "web-streams-polyfill": "^4.2.0",
-    "youtube-extractor": "github:anishdevtech/youtube-extractor-rn#eb87a5a",
     "youtubei.js": "^15.1.1"
   },
   "devDependencies": {
