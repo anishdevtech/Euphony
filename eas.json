@@ -8,13 +8,6 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      },
-      "env": {
-        "EAS_SKIP_AUTO_FINGERPRINT": "1",
-        "EAS_BUILD_SKIP_NPM_CI": "1"
-      },
-      "cache": {
-        "disabled": true
       }
     }
   }

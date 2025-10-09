@@ -3,10 +3,16 @@ import { useColorScheme } from 'react-native';
 import { ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { AppDarkTheme, AppLightTheme } from '../src/theme/theme';
+import { YouTubeService } from '@/src/services/YouTubeService';
 
 export default function RootLayout() {
-  const scheme = useColorScheme(); // 'light' | 'dark'
-  return (
+  useEffect(() => {
+    // Pre-warm YouTube client
+    YouTubeService.warmup();
+  }, []);
+const scheme = useColorScheme(); // 'light' | 'dark'
+  
+return (
     <ThemeProvider value={scheme === 'dark' ? AppDarkTheme : AppLightTheme}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

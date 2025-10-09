@@ -1,75 +1,117 @@
-import { getInnertube } from '../lib/youtube';
-import { Song } from '../types/music';
+import { Innertube } from 'youtubei.js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-class YouTubeService {
-  async searchSongs(query: string): Promise<Song[]> {
+// Singleton client instance
+let cachedClient: Innertube | null = null;
+
+export class YouTubeService {
+  
+  // Get or create YouTube client (cached)
+  static async getClient(): Promise<Innertube> {
+    if (cachedClient) return cachedClient;
+    
+    cachedClient = await Innertube.create({
+      cache: new UniversalCache(false),
+      generate_session_locally: true
+    });
+    
+    return cachedClient;
+  }
+
+  // Get stream URL with 6-hour cache
+  static async getStreamUrl(videoId: string): Promise<string | null> {
     try {
-      console.log('🔍 Searching:', query);
-      const innertube = await getInnertube();
+      const cacheKey = `stream_${videoId}`;
+      const cached = await AsyncStorage.getItem(cacheKey);
       
-      const search = await innertube.search(query, { type: 'video' });
-      
-      const songs: Song[] = [];
-      
-      for (const result of search.results) {
-        if (result.type === 'Video') {
-          songs.push({
-            id: result.id,
-            title: result.title.text || 'Unknown',
-            artist: result.author?.name || 'Unknown',
-            duration: result.duration?.text || '',
-            thumbnail: result.thumbnails?.[0]?.url || '',
-          });
+      // Check cache first
+      if (cached) {
+        const { url, timestamp } = JSON.parse(cached);
+        const age = Date.now() - timestamp;
+        
+        // Cache valid for 6 hours
+        if (age < 6 * 60 * 60 * 1000) {
+          console.log('✅ Using cached stream URL');
+          return url;
         }
       }
       
-      console.log(`✅ Found ${songs.length} songs`);
-      return songs;
+      // Fetch fresh URL
+      console.log('🔄 Fetching stream URL from YouTube...');
+      const youtube = await this.getClient();
+      const info = await youtube.getInfo(videoId);
+      
+      // Get best audio format
+      const audioFormat = info.streaming_data?.adaptive_formats
+        ?.find(f => f.mime_type.includes('audio'))
+        || info.streaming_data?.formats?.[0];
+      
+      const url = audioFormat?.decipher(youtube.session.player);
+      
+      if (!url) throw new Error('No stream URL found');
+      
+      // Cache it
+      await AsyncStorage.setItem(cacheKey, JSON.stringify({
+        url,
+        timestamp: Date.now()
+      }));
+      
+      console.log('✅ Stream URL cached');
+      return url;
+      
+    } catch (error) {
+      console.error('❌ Error getting stream URL:', error);
+      return null;
+    }
+  }
+
+  // Search for videos
+  static async search(query: string, limit: number = 20) {
+    try {
+      const youtube = await this.getClient();
+      const results = await youtube.search(query, { type: 'video' });
+      
+      return results.videos.slice(0, limit).map(video => ({
+        id: video.id,
+        title: video.title.text,
+        artist: video.author?.name,
+        thumbnail: video.thumbnails[0]?.url,
+        duration: video.duration?.text
+      }));
+      
     } catch (error) {
       console.error('❌ Search error:', error);
       return [];
     }
   }
 
-  async getAudioUrl(videoId: string): Promise<string> {
+  // Get video details
+  static async getVideoInfo(videoId: string) {
     try {
-      console.log('🎵 Getting audio for:', videoId);
-      const innertube = await getInnertube();
+      const youtube = await this.getClient();
+      const info = await youtube.getInfo(videoId);
       
-      const info = await innertube.getInfo(videoId);
+      return {
+        id: videoId,
+        title: info.basic_info.title,
+        artist: info.basic_info.author,
+        thumbnail: info.basic_info.thumbnail?.[0]?.url,
+        duration: info.basic_info.duration
+      };
       
-      const formats = info.streaming_data?.adaptive_formats || [];
-      const audioFormats = formats.filter((f: any) => 
-        f.has_audio && !f.has_video
-      );
+    } catch (error) {
+      console.error('❌ Error getting video info:', error);
+      return null;
+    }
+  }
 
-      if (audioFormats.length === 0) {
-        throw new Error('No audio formats found');
-      }
-
-      const bestAudio = audioFormats.sort((a: any, b: any) => 
-        (b.bitrate || 0) - (a.bitrate || 0)
-      )[0];
-
-      let url = bestAudio.url;
-      
-      if (!url && bestAudio.decipher) {
-        console.log('🔐 Deciphering...');
-        url = bestAudio.decipher(innertube.session.player);
-      }
-
-      if (!url) {
-        throw new Error('Could not get audio URL');
-      }
-      
-      console.log('✅ Got audio URL!');
-      return url;
-      
-    } catch (error: any) {
-      console.error('❌ Get audio error:', error.message);
-      throw error;
+  // Pre-warm the cache on app start
+  static async warmup() {
+    try {
+      await this.getClient();
+      console.log('✅ YouTube client warmed up');
+    } catch (error) {
+      console.error('❌ Warmup failed:', error);
     }
   }
 }
-
-export default new YouTubeService();
